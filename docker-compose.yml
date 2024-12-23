@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Service
+  postgres:
+    image: postgres:latest
+    container_name: tradingbot_postgres
+    environment:
+      POSTGRES_USER: tradingAdmin
+      POSTGRES_PASSWORD: tradingPass
+      POSTGRES_DB: tradingdb
+    ports:
+      - "5432:5432"
+    networks:
+      - trading_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  # Spring Boot Application Service
+  tradingbot:
+    build:
+      context: .
+    container_name: tradingbot_app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tradingdb
+      SPRING_DATASOURCE_USERNAME: tradingAdmin
+      SPRING_DATASOURCE_PASSWORD: tradingPass
+    depends_on:
+      - postgres
+    networks:
+      - trading_network
+    restart: always
+
+# Volumes
+volumes:
+  postgres_data:
+
+# Networks
+networks:
+  trading_network:
+    driver: bridge
