@@ -1,0 +1,15 @@
+# Compiled class files
+*.class
+
+# Maven build directory
+target/
+
+# Log files
+*.log
+
+# IDE directories
+.idea/
+.vscode/
+
+# macOS system files
+.DS_Store
