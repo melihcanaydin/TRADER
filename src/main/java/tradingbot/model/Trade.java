@@ -1,4 +1,4 @@
-package main.java.tradingbot.model;
+package tradingbot.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
