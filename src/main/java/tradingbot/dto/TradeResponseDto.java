@@ -1,6 +1,7 @@
-package main.java.tradingbot.dto;
+package tradingbot.dto;
 
 public class TradeResponseDto {
+
     private String message;
 
     public TradeResponseDto() {
@@ -20,8 +21,8 @@ public class TradeResponseDto {
 
     @Override
     public String toString() {
-        return "TradeResponseDto{" +
-               "message='" + message + '\'' +
-               '}';
+        return "TradeResponseDto{"
+                + "message='" + message + '\''
+                + '}';
     }
 }

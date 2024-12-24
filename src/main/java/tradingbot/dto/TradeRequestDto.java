@@ -1,11 +1,13 @@
-package main.java.tradingbot.dto;
+package tradingbot.dto;
 
 public class TradeRequestDto {
+
     private String symbol;
     private double high;
     private double low;
 
-    public TradeRequestDto() {}
+    public TradeRequestDto() {
+    }
 
     public TradeRequestDto(String symbol, double high, double low) {
         this.symbol = symbol;
@@ -39,10 +41,10 @@ public class TradeRequestDto {
 
     @Override
     public String toString() {
-        return "TradeRequestDto{" +
-               "symbol='" + symbol + '\'' +
-               ", high=" + high +
-               ", low=" + low +
-               '}';
+        return "TradeRequestDto{"
+                + "symbol='" + symbol + '\''
+                + ", high=" + high
+                + ", low=" + low
+                + '}';
     }
 }
