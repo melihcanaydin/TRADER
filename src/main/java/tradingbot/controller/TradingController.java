@@ -1,4 +1,4 @@
-package main.java.tradingbot.controller;
+package tradingbot.controller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,14 +8,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import main.java.tradingbot.dto.TradeRequestDto;
-import main.java.tradingbot.dto.TradeResponseDto;
-import main.java.tradingbot.service.trading.TradeService;
+import tradingbot.dto.TradeRequestDto;
+import tradingbot.dto.TradeResponseDto;
+import tradingbot.service.trading.TradeService;
 
 @RestController
 @RequestMapping("/api/trade")
 public class TradingController {
 
+    private static final Logger logger = LoggerFactory.getLogger(TradingController.class);
     private final TradeService tradeService;
 
     public TradingController(TradeService tradeService) {
@@ -24,7 +25,6 @@ public class TradingController {
 
     @PostMapping("/check")
     public ResponseEntity<TradeResponseDto> checkTrade(@RequestBody TradeRequestDto request) {
-        Logger logger = LoggerFactory.getLogger(TradingController.class);
         try {
             tradeService.performTrade(request.getSymbol(), request.getHigh(), request.getLow());
             return ResponseEntity.ok(new TradeResponseDto("Trade check completed!"));
