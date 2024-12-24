@@ -14,14 +14,14 @@
 
 ## Environment Variable ( Locally )
 
-You can edit application.properties or add your own keys to environment variables
+You should create .env file to put your keys here as following;
 
 ```bash
-export BINANCE_API_KEY="your_api_key"
-export BINANCE_API_SECRET="your_api_secret"
-export DB_URL="jdbc:postgresql://localhost:5432/tradingdb"
-export DB_USERNAME="ADMIN"
-export DB_PASSWORD="PASS"
+BINANCE_API_KEY="your_api_key"
+BINANCE_API_SECRET="your_api_secret"
+DB_URL="jdbc:postgresql://localhost:5432/tradingdb"
+DB_USERNAME="ADMIN"
+DB_PASSWORD="PASS"
 ```
 
 ---
