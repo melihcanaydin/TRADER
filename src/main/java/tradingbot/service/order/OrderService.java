@@ -24,7 +24,7 @@ public class OrderService {
     }
 
     @Transactional
-    public ExecutionOrder saveOrder(ExecutionOrder order) {
+    public synchronized ExecutionOrder saveOrder(ExecutionOrder order) {
         logger.info("Attempting to save order: {}", order);
 
         checkForDuplicateOrder(order);
