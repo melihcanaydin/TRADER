@@ -1,4 +1,4 @@
-package main.java.tradingbot.service.trading;
+package tradingbot.service.trading;
 
 import org.springframework.stereotype.Service;
 

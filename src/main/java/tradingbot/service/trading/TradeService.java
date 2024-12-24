@@ -1,4 +1,4 @@
-package main.java.tradingbot.service.trading;
+package tradingbot.service.trading;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,8 +6,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import main.java.tradingbot.model.Order;
-import main.java.tradingbot.service.order.OrderService;
+import tradingbot.model.ExecutionOrder;
+import tradingbot.service.order.OrderService;
 
 @Service
 public class TradeService {
@@ -36,11 +36,11 @@ public class TradeService {
                 processedTrades.add(tradeKey);
 
                 try {
-                    Order order = new Order();
-                    order.setSymbol(symbol);
-                    order.setPrice(target);
-                    order.setOrderType("BUY");
-                    orderService.saveOrder(order);
+                    ExecutionOrder executionOrder = new ExecutionOrder();
+                    executionOrder.setSymbol(symbol);
+                    executionOrder.setPrice(target);
+                    executionOrder.setOrderType("BUY");
+                    orderService.saveOrder(executionOrder);
                     System.out.println("Buy signal at: " + target);
                 } catch (IllegalArgumentException e) {
                     processedTrades.remove(tradeKey);
