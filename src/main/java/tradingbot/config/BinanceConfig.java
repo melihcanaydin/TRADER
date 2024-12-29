@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
-import com.binance.api.client.BinanceApiWebSocketClient;
 
 @Configuration
 public class BinanceConfig {
@@ -21,11 +20,5 @@ public class BinanceConfig {
     public BinanceApiRestClient binanceApiRestClient() {
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(apiKey, apiSecret);
         return factory.newRestClient();
-    }
-
-    @Bean
-    public BinanceApiWebSocketClient binanceApiWebSocketClient() {
-        BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(apiKey, apiSecret);
-        return factory.newWebSocketClient();
     }
 }
