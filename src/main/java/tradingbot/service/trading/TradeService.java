@@ -27,7 +27,8 @@ public class TradeService {
     @Transactional
     public void performTrade(String symbol, double high, double low) {
         double[] levels = fibonacciService.calculateFibonacciLevels(high, low);
-        double currentPrice = binanceService.getCurrentPrice(symbol);
+
+        double currentPrice = binanceService.getCurrentPrice(symbol).getPrice();
 
         for (double target : levels) {
             String tradeKey = symbol + "-" + target;

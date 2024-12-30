@@ -13,8 +13,9 @@ public class LogicRepository {
 
     private final Map<Coin, CoinData> coinDataMap = new HashMap<>();
 
-    public void updateCoinData(Coin coin, double price, double[] fibonacciLevels) {
-        coinDataMap.put(coin, new CoinData(price, fibonacciLevels));
+    public void updateCoinData(Coin coin, double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume, Map<Integer, Double> movingAverages) {
+        CoinData coinData = new CoinData(price, fibonacciLevels, rsi, volume, previousVolume, movingAverages);
+        coinDataMap.put(coin, coinData);
     }
 
     public CoinData getCoinData(Coin coin) {

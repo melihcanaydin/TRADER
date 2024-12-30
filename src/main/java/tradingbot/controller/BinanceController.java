@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.binance.api.client.domain.market.CandlestickInterval;
 
+import tradingbot.dto.PriceResponseDto;
 import tradingbot.service.trading.BinanceService;
 
 @RestController
@@ -18,7 +19,7 @@ public class BinanceController {
     }
 
     @GetMapping("/api/price")
-    public double getCurrentPrice(@RequestParam String symbol) {
+    public PriceResponseDto getCurrentPrice(@RequestParam String symbol) {
         return binanceService.getCurrentPrice(symbol);
     }
 
