@@ -23,14 +23,13 @@ public class MarketDataService {
     }
 
     public double getRSI(String symbol) {
-        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 14, null, null);
+        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 16, null, null);
 
-        if (candlesticks.size() < 14 + 1) { //TODO:MCA How to calculate it properly
-            System.err.println("Insufficient data for RSI calculation for symbol: " + symbol);
+        if (candlesticks.size() < 14 + 1) {
+            System.out.println("Insufficient data for RSI calculation for symbol: " + symbol);
             return -1.0;
         }
 
-        // Extract closing prices and calculate RSI
         List<Double> closes = candlesticks.stream()
                 .map(c -> Double.parseDouble(c.getClose()))
                 .collect(Collectors.toList());

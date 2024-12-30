@@ -10,14 +10,16 @@ public class CoinData {
     private final double volume;
     private final double previousVolume;
     private final Map<Integer, Double> movingAverages;
+    private final Map<Integer, Double> previousMovingAverages;
 
-    public CoinData(double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume, Map<Integer, Double> movingAverages) {
+    public CoinData(double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume, Map<Integer, Double> movingAverages, Map<Integer, Double> previousMovingAverages) {
         this.price = price;
         this.fibonacciLevels = fibonacciLevels;
         this.rsi = rsi;
         this.volume = volume;
         this.previousVolume = previousVolume;
         this.movingAverages = movingAverages;
+        this.previousMovingAverages = previousMovingAverages;
     }
 
     // Getters
@@ -43,5 +45,21 @@ public class CoinData {
 
     public double getMovingAverage(int period) {
         return movingAverages.getOrDefault(period, 0.0);
+    }
+
+    public double getRsi() {
+        return rsi;
+    }
+
+    public Map<Integer, Double> getMovingAverages() {
+        return movingAverages;
+    }
+
+    public Map<Integer, Double> getPreviousMovingAverages() {
+        return previousMovingAverages;
+    }
+
+    public Double getPreviousMovingAverage(int period) {
+        return previousMovingAverages.getOrDefault(period, 0.0);
     }
 }

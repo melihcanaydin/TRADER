@@ -1,12 +1,18 @@
 package tradingbot.service.trading;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.binance.api.client.domain.market.CandlestickInterval;
+
 import tradingbot.model.Coin;
 import tradingbot.repository.LogicRepository;
+import tradingbot.rules.Rule;
+import tradingbot.rules.RuleEngine;
 import tradingbot.service.marketdata.MarketDataService;
 
 @Service
@@ -15,11 +21,13 @@ public class PriceCheckerService {
     private final LogicRepository logicRepository;
     private final MarketDataService marketDataService;
     private final FibonacciService fibonacciService;
+    private final RuleEngine ruleEngine;
 
-    public PriceCheckerService(LogicRepository logicRepository, MarketDataService marketDataService, FibonacciService fibonacciService) {
+    public PriceCheckerService(LogicRepository logicRepository, MarketDataService marketDataService, FibonacciService fibonacciService, RuleEngine ruleEngine) {
         this.logicRepository = logicRepository;
         this.marketDataService = marketDataService;
         this.fibonacciService = fibonacciService;
+        this.ruleEngine = ruleEngine;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -27,13 +35,19 @@ public class PriceCheckerService {
         updateCoinData();
 
         logicRepository.getAllCoinData().forEach((coin, data) -> {
-            double currentPrice = data.getPrice();
-            double[] fibonacciLevels = data.getFibonacciLevels();
-            for (double level : fibonacciLevels) {
-                if (currentPrice <= level) {
-                    System.out.println("Buy signal for " + coin + " at price: " + currentPrice);
-                }
+            System.out.println("Checking rules for: " + coin);
+
+            // Use the RuleEngine to evaluate rules for the current CoinData
+            List<Rule> matchedRules = ruleEngine.getMatchingRules(data);
+
+            if (!matchedRules.isEmpty()) {
+                System.out.println("Matched rules for " + coin + ":");
+                matchedRules.forEach(rule -> System.out.println("- " + rule.getClass().getSimpleName()));
+            } else {
+                System.out.println("No rules matched for " + coin);
             }
+
+            //TODO:MCA Implement and decide how to decide performing trades based on Rules matched
         });
     }
 
@@ -52,17 +66,25 @@ public class PriceCheckerService {
                 double volume = marketDataService.getVolume(coin.name());
                 double previousVolume = marketDataService.getPreviousVolume(coin.name());
 
+                List<Integer> periods = List.of(5, 8, 21);
+                Map<Integer, Double> existingMovingAverages = logicRepository.getMovingAverages(coin, periods);
+                Map<Integer, Double> previousMovingAverages = periods.stream()
+                        .collect(Collectors.toMap(
+                                period -> period,
+                                period -> existingMovingAverages != null && existingMovingAverages.containsKey(period)
+                                ? existingMovingAverages.get(period)
+                                : 0.0
+                        ));
+
                 Map<Integer, Double> movingAverages = Map.of(
                         5, marketDataService.getMovingAverage(coin.name(), 5),
                         8, marketDataService.getMovingAverage(coin.name(), 8),
                         21, marketDataService.getMovingAverage(coin.name(), 21)
                 );
 
-                double high = 20000.0; // Replace with actual high value logic
-                double low = 19000.0;  // Replace with actual low value logic
-                double[] fibonacciLevels = fibonacciService.calculateFibonacciLevels(high, low);
+                double[] fibonacciLevels = fibonacciService.calculateFibonacciLevels(coin.name(), CandlestickInterval.DAILY, 14);
 
-                logicRepository.updateCoinData(coin, currentPrice, fibonacciLevels, rsi, volume, previousVolume, movingAverages);
+                logicRepository.updateCoinData(coin, currentPrice, fibonacciLevels, rsi, volume, previousVolume, movingAverages, previousMovingAverages);
 
                 System.out.println("Updated data for " + coin.name() + ": {"
                         + "currentPrice=" + currentPrice
@@ -70,6 +92,7 @@ public class PriceCheckerService {
                         + ", volume=" + volume
                         + ", previousVolume=" + previousVolume
                         + ", movingAverages=" + movingAverages
+                        + ", previousMovingAverages=" + previousMovingAverages
                         + ", fibonacciLevels=" + java.util.Arrays.toString(fibonacciLevels)
                         + "}");
 

@@ -1,9 +1,13 @@
 package tradingbot.rules;
 
-import tradingbot.model.CoinData;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+import tradingbot.model.CoinData;
+
+@Component
 public class RuleEngine {
 
     private final List<Rule> rules = new ArrayList<>();
@@ -13,12 +17,12 @@ public class RuleEngine {
     }
 
     public List<Rule> getMatchingRules(CoinData coinData) {
-        List<Rule> matchingRules = new ArrayList<>();
+        List<Rule> matchedRules = new ArrayList<>();
         for (Rule rule : rules) {
             if (rule.check(coinData)) {
-                matchingRules.add(rule);
+                matchedRules.add(rule);
             }
         }
-        return matchingRules;
+        return matchedRules;
     }
 }
