@@ -66,7 +66,6 @@ public class MarketDataService {
             changes[i - 1] = closes.get(i) - closes.get(i - 1);
         }
 
-        // Separate gains and losses
         double[] gains = new double[changes.length];
         double[] losses = new double[changes.length];
         for (int i = 0; i < changes.length; i++) {
@@ -77,7 +76,6 @@ public class MarketDataService {
             }
         }
 
-        // Calculate the average gain and loss for the initial period
         double averageGain = 0;
         double averageLoss = 0;
         for (int i = 0; i < period; i++) {
@@ -87,16 +85,13 @@ public class MarketDataService {
         averageGain /= period;
         averageLoss /= period;
 
-        // Smooth the averages using the Wilder's smoothing technique
         for (int i = period; i < changes.length; i++) {
             averageGain = (averageGain * (period - 1) + gains[i]) / period;
             averageLoss = (averageLoss * (period - 1) + losses[i]) / period;
         }
 
-        // Calculate Relative Strength (RS)
         double rs = averageLoss == 0 ? Double.POSITIVE_INFINITY : averageGain / averageLoss;
 
-        // Calculate RSI
         return 100 - (100 / (1 + rs));
     }
 }

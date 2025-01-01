@@ -29,7 +29,6 @@ public class FibonacciService {
     public double[] calculateFibonacciLevels(String coinName, CandlestickInterval interval, int period) {
         List<Candlestick> candlesticks = binanceClient.getCandlestickBars(coinName, interval, period, null, null);
 
-        // Calculate high and low prices
         double high = candlesticks.stream()
                 .mapToDouble(c -> Double.parseDouble(c.getHigh()))
                 .max()

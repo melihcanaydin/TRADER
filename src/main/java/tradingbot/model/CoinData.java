@@ -22,7 +22,6 @@ public class CoinData {
         this.previousMovingAverages = previousMovingAverages;
     }
 
-    // Getters
     public double getPrice() {
         return price;
     }

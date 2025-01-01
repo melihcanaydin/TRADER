@@ -37,7 +37,6 @@ public class PriceCheckerService {
         logicRepository.getAllCoinData().forEach((coin, data) -> {
             System.out.println("Checking rules for: " + coin);
 
-            // Use the RuleEngine to evaluate rules for the current CoinData
             List<Rule> matchedRules = ruleEngine.getMatchingRules(data);
 
             if (!matchedRules.isEmpty()) {
