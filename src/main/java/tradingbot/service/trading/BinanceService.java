@@ -3,6 +3,8 @@ package tradingbot.service.trading;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.binance.api.client.BinanceApiRestClient;
@@ -14,6 +16,7 @@ import tradingbot.dto.PriceResponseDto;
 @Service
 public class BinanceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(BinanceService.class);
     private final BinanceApiRestClient binanceApiRestClient;
 
     public BinanceService(BinanceApiRestClient binanceApiRestClient) {
@@ -41,6 +44,6 @@ public class BinanceService {
 
     public void pingServer() {
         binanceApiRestClient.ping();
-        System.out.println("Ping successful to Binance API");
+        logger.info("Ping successful to Binance API");
     }
 }

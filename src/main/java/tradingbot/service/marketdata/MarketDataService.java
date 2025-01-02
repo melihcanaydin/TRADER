@@ -3,6 +3,8 @@ package tradingbot.service.marketdata;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.binance.api.client.BinanceApiRestClient;
@@ -12,6 +14,7 @@ import com.binance.api.client.domain.market.CandlestickInterval;
 @Service
 public class MarketDataService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MarketDataService.class);
     private final BinanceApiRestClient binanceClient;
 
     public MarketDataService(BinanceApiRestClient binanceClient) {
@@ -26,7 +29,7 @@ public class MarketDataService {
         List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 16, null, null);
 
         if (candlesticks.size() < 14 + 1) {
-            System.out.println("Insufficient data for RSI calculation for symbol: " + symbol);
+            logger.info("Insufficient data for RSI calculation for symbol: " + symbol);
             return -1.0;
         }
 

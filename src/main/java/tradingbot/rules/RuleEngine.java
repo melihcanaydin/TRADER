@@ -10,10 +10,10 @@ import tradingbot.model.CoinData;
 @Component
 public class RuleEngine {
 
-    private final List<Rule> rules = new ArrayList<>();
+    private final List<Rule> rules;
 
-    public void registerRule(Rule rule) {
-        rules.add(rule);
+    public RuleEngine(List<Rule> rules) {
+        this.rules = rules;
     }
 
     public List<Rule> getMatchingRules(CoinData coinData) {

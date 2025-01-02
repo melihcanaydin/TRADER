@@ -1,7 +1,10 @@
 package tradingbot.rules;
 
+import org.springframework.stereotype.Component;
+
 import tradingbot.model.CoinData;
 
+@Component
 public class RSIWithVolumeIncreaseRule implements Rule {
 
     @Override

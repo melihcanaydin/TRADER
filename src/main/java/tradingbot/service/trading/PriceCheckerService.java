@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ import tradingbot.service.marketdata.MarketDataService;
 
 @Service
 public class PriceCheckerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PriceCheckerService.class);
 
     private final LogicRepository logicRepository;
     private final MarketDataService marketDataService;
@@ -35,15 +39,14 @@ public class PriceCheckerService {
         updateCoinData();
 
         logicRepository.getAllCoinData().forEach((coin, data) -> {
-            System.out.println("Checking rules for: " + coin);
+            logger.info("Checking rules for: " + coin);
 
             List<Rule> matchedRules = ruleEngine.getMatchingRules(data);
 
             if (!matchedRules.isEmpty()) {
-                System.out.println("Matched rules for " + coin + ":");
-                matchedRules.forEach(rule -> System.out.println("- " + rule.getClass().getSimpleName()));
+                matchedRules.forEach(rule -> logger.info("Matched rules for " + coin + ": " + rule.getClass().getSimpleName()));
             } else {
-                System.out.println("No rules matched for " + coin);
+                logger.info("No rules matched for " + coin);
             }
 
             //TODO:MCA Implement and decide how to decide performing trades based on Rules matched
@@ -51,7 +54,7 @@ public class PriceCheckerService {
     }
 
     private void updateCoinData() {
-        System.out.println("Starting updateCoinData...");
+        logger.info("Starting updateCoinData...");
 
         for (Coin coin : Coin.values()) {
             try {
@@ -59,7 +62,7 @@ public class PriceCheckerService {
 
                 double rsi = marketDataService.getRSI(coin.name());
                 if (rsi < 0) {
-                    System.out.println("There is not enough data to calculate RSI. Skipping for: " + coin.name());
+                    logger.info("There is not enough data to calculate RSI. Skipping for: " + coin.name());
                 }
 
                 double volume = marketDataService.getVolume(coin.name());
@@ -85,7 +88,7 @@ public class PriceCheckerService {
 
                 logicRepository.updateCoinData(coin, currentPrice, fibonacciLevels, rsi, volume, previousVolume, movingAverages, previousMovingAverages);
 
-                System.out.println("Updated data for " + coin.name() + ": {"
+                logger.info("Updated data for " + coin.name() + ": {"
                         + "currentPrice=" + currentPrice
                         + ", rsi=" + rsi
                         + ", volume=" + volume
@@ -100,6 +103,6 @@ public class PriceCheckerService {
             }
         }
 
-        System.out.println("Finished updateCoinData.");
+        logger.info("Finished updateCoinData.");
     }
 }

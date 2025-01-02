@@ -3,6 +3,8 @@ package tradingbot.service.trading;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +13,8 @@ import tradingbot.service.order.OrderService;
 
 @Service
 public class TradeService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TradeService.class);
 
     private final FibonacciService fibonacciService;
     private final BinanceService binanceService;
@@ -42,7 +46,7 @@ public class TradeService {
                     executionOrder.setPrice(target);
                     executionOrder.setOrderType("BUY");
                     orderService.saveOrder(executionOrder);
-                    System.out.println("Buy signal at: " + target);
+                    logger.info("Buy signal at: " + target);
                 } catch (IllegalArgumentException e) {
                     processedTrades.remove(tradeKey);
                     System.err.println("Failed to save order: " + e.getMessage());
