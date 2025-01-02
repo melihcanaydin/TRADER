@@ -20,3 +20,5 @@ public class TradingBotApplication {
         application.run(args);
     }
 }
+
+// TODO: MCA Quartz öğren ve scheduled yerine kullan 

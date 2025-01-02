@@ -27,12 +27,12 @@ public class LogicRepository {
         MarketData marketData = new MarketData();
         marketData.setSymbol(coin.toString());
         marketData.setClosePrice(price);
-        marketData.setHighPrice(0.0);
-        marketData.setLowPrice(0.0);
+        marketData.setHighPrice(fibonacciLevels[0]);
+        marketData.setLowPrice(fibonacciLevels[fibonacciLevels.length - 1]);
         marketData.setVolume(volume);
-        marketData.setMovingAverage5(movingAverages.get(5));
-        marketData.setMovingAverage8(movingAverages.get(8));
-        marketData.setMovingAverage21(movingAverages.get(21));
+        marketData.setMovingAverage5(movingAverages.getOrDefault(5, 0.0));
+        marketData.setMovingAverage8(movingAverages.getOrDefault(8, 0.0));
+        marketData.setMovingAverage21(movingAverages.getOrDefault(21, 0.0));
         marketData.setRsi(rsi);
         marketData.setCreatedAt(LocalDateTime.now());
 

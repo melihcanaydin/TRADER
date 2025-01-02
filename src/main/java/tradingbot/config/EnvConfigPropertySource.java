@@ -1,6 +1,7 @@
 package tradingbot.config;
 
 import org.springframework.core.env.PropertySource;
+import org.springframework.lang.NonNull;
 
 public class EnvConfigPropertySource extends PropertySource<EnvConfig> {
 
@@ -9,7 +10,7 @@ public class EnvConfigPropertySource extends PropertySource<EnvConfig> {
     }
 
     @Override
-    public Object getProperty(String name) {
+    public Object getProperty(@NonNull String name) {
         return EnvConfig.get(name);
     }
 }

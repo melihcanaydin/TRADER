@@ -15,18 +15,33 @@ import com.binance.api.client.domain.market.CandlestickInterval;
 public class MarketDataService {
 
     private static final Logger logger = LoggerFactory.getLogger(MarketDataService.class);
-    private final BinanceApiRestClient binanceClient;
+    private final BinanceApiRestClient binanceApiClient;
 
-    public MarketDataService(BinanceApiRestClient binanceClient) {
-        this.binanceClient = binanceClient;
+    public MarketDataService(BinanceApiRestClient binanceApiClient) {
+        this.binanceApiClient = binanceApiClient;
+    }
+
+    public List<Candlestick> getCandlesticks(String symbol, CandlestickInterval interval) {
+        logger.info("Fetching candlestick data for {} with interval {}", symbol, interval);
+        try {
+            return binanceApiClient.getCandlestickBars(symbol, interval);
+        } catch (Exception e) {
+            logger.error("Failed to fetch candlesticks for {}: {}", symbol, e.getMessage(), e);
+            throw e;
+        }
     }
 
     public double getCurrentPrice(String symbol) {
-        return Double.parseDouble(binanceClient.getPrice(symbol).getPrice());
+        try {
+            return Double.parseDouble(binanceApiClient.getPrice(symbol).getPrice());
+        } catch (Exception e) {
+            logger.error("Failed to fetch current price for {}: {}", symbol, e.getMessage(), e);
+            throw e;
+        }
     }
 
     public double getRSI(String symbol) {
-        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 16, null, null);
+        List<Candlestick> candlesticks = binanceApiClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 16, null, null);
 
         if (candlesticks.size() < 14 + 1) {
             logger.info("Insufficient data for RSI calculation for symbol: " + symbol);
@@ -37,21 +52,6 @@ public class MarketDataService {
                 .map(c -> Double.parseDouble(c.getClose()))
                 .collect(Collectors.toList());
         return calculateRSI(closes);
-    }
-
-    public double getVolume(String symbol) {
-        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 1, null, null);
-        return Double.parseDouble(candlesticks.get(0).getVolume());
-    }
-
-    public double getPreviousVolume(String symbol) {
-        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, 2, null, null);
-        return Double.parseDouble(candlesticks.get(0).getVolume());
-    }
-
-    public double getMovingAverage(String symbol, int period) {
-        List<Candlestick> candlesticks = binanceClient.getCandlestickBars(symbol, CandlestickInterval.DAILY, period, null, null);
-        return candlesticks.stream().mapToDouble(c -> Double.parseDouble(c.getClose())).average().orElse(0.0);
     }
 
     private double calculateRSI(List<Double> closes) {
@@ -96,5 +96,67 @@ public class MarketDataService {
         double rs = averageLoss == 0 ? Double.POSITIVE_INFINITY : averageGain / averageLoss;
 
         return 100 - (100 / (1 + rs));
+    }
+
+    public double calculateVolume(List<Candlestick> candlesticks) {
+        return candlesticks.stream().mapToDouble(c -> Double.parseDouble(c.getVolume())).sum();
+    }
+
+    public double calculatePreviousVolume(List<Candlestick> candlesticks) {
+        if (candlesticks.size() < 2) {
+            logger.warn("Not enough data for previous volume");
+            return 0;
+        }
+        return Double.parseDouble(candlesticks.get(candlesticks.size() - 2).getVolume());
+    }
+
+    public double calculateMovingAverage(List<Candlestick> candlesticks, int period) {
+        if (candlesticks.size() < period) {
+            logger.warn("Not enough data for {}-period moving average", period);
+            return 0;
+        }
+        return candlesticks.subList(candlesticks.size() - period, candlesticks.size())
+                .stream()
+                .mapToDouble(c -> Double.parseDouble(c.getClose()))
+                .average()
+                .orElse(0);
+    }
+
+    public double calculatePreviousMovingAverage(List<Candlestick> candlesticks, int period) {
+        if (candlesticks.size() < period + 1) {
+            logger.warn("Not enough data for previous {}-period moving average", period);
+            return 0;
+        }
+        return candlesticks.subList(candlesticks.size() - period - 1, candlesticks.size() - 1)
+                .stream()
+                .mapToDouble(c -> Double.parseDouble(c.getClose()))
+                .average()
+                .orElse(0);
+    }
+
+    public double[] calculateFibonacciLevels(List<Candlestick> candlesticks) {
+        if (candlesticks.isEmpty()) {
+            logger.warn("No candlesticks available for Fibonacci calculation");
+            return new double[0];
+        }
+
+        double high = candlesticks.stream()
+                .mapToDouble(c -> Double.parseDouble(c.getHigh()))
+                .max()
+                .orElse(0);
+        double low = candlesticks.stream()
+                .mapToDouble(c -> Double.parseDouble(c.getLow()))
+                .min()
+                .orElse(0);
+
+        double diff = high - low;
+        return new double[]{
+            high,
+            high - 0.236 * diff,
+            high - 0.382 * diff,
+            high - 0.5 * diff,
+            high - 0.618 * diff,
+            low
+        };
     }
 }
