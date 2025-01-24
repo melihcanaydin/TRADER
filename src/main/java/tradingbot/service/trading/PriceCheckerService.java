@@ -12,8 +12,10 @@ import org.springframework.stereotype.Service;
 import com.binance.api.client.domain.market.Candlestick;
 import com.binance.api.client.domain.market.CandlestickInterval;
 
+import tradingbot.model.BuySuggestion;
 import tradingbot.model.Coin;
 import tradingbot.model.CoinData;
+import tradingbot.repository.BuySuggestionRepository;
 import tradingbot.repository.LogicRepository;
 import tradingbot.rules.Rule;
 import tradingbot.rules.RuleEngine;
@@ -27,11 +29,13 @@ public class PriceCheckerService {
     private final LogicRepository logicRepository;
     private final MarketDataService marketDataService;
     private final RuleEngine ruleEngine;
+    private final BuySuggestionRepository buySuggestionRepository;
 
-    public PriceCheckerService(LogicRepository logicRepository, MarketDataService marketDataService, RuleEngine ruleEngine) {
+    public PriceCheckerService(LogicRepository logicRepository, MarketDataService marketDataService, RuleEngine ruleEngine, BuySuggestionRepository buySuggestionRepository) {
         this.logicRepository = logicRepository;
         this.marketDataService = marketDataService;
         this.ruleEngine = ruleEngine;
+        this.buySuggestionRepository = buySuggestionRepository;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -88,9 +92,14 @@ public class PriceCheckerService {
         List<Rule> matchedRules = ruleEngine.getMatchingRules(coinData);
 
         if (!matchedRules.isEmpty()) {
-            matchedRules.forEach(rule -> logger.info("Matched rule: {} for {}", rule.getClass().getSimpleName(), coin.name()));
-            logger.info("BUY : " + coin.name() + " Buying Price : " + coinData.getPrice());
+            matchedRules.forEach(rule -> {
+                logger.info("Matched rule: {} for {}", rule.getClass().getSimpleName(), coin.name());
+                
+                BuySuggestion buySuggestion = new BuySuggestion(coin.name(), coinData.getPrice());
+                buySuggestionRepository.save(buySuggestion);
 
+                logger.info("Buy suggestion saved for {} at price {}", coin.name(), coinData.getPrice());
+            });
         } else {
             logger.info("No rules matched for {}", coin.name());
         }
