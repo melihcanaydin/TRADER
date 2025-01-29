@@ -2,31 +2,16 @@ package tradingbot.model;
 
 import java.time.LocalDateTime;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-
-@Entity
 public class ExecutionOrder {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String symbol;
-
-    private String orderType;
-
-    private double price;
-
-    private double quantity;
-
-    private LocalDateTime timestamp;
-
-    public ExecutionOrder() {
-        this.timestamp = LocalDateTime.now();
-    }
+    private OrderType orderType;
+    private Double price;
+    private Double quantity;
+    private Integer leverage;
+    private Double trailingStop;
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     public Long getId() {
         return id;
@@ -44,28 +29,44 @@ public class ExecutionOrder {
         this.symbol = symbol;
     }
 
-    public String getOrderType() {
+    public OrderType getOrderType() {
         return orderType;
     }
 
-    public void setOrderType(String orderType) {
+    public void setOrderType(OrderType orderType) {
         this.orderType = orderType;
     }
 
-    public double getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
-    public double getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(double quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
+    }
+
+    public Integer getLeverage() {
+        return leverage;
+    }
+
+    public void setLeverage(Integer leverage) {
+        this.leverage = leverage;
+    }
+
+    public Double getTrailingStop() {
+        return trailingStop;
+    }
+
+    public void setTrailingStop(Double trailingStop) {
+        this.trailingStop = trailingStop;
     }
 
     public LocalDateTime getTimestamp() {
