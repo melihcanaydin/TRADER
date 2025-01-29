@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import tradingbot.model.ExecutionOrder;
+import tradingbot.model.OrderType;
 import tradingbot.service.order.OrderService;
 
 @Service
@@ -44,7 +45,7 @@ public class TradeService {
                     ExecutionOrder executionOrder = new ExecutionOrder();
                     executionOrder.setSymbol(symbol);
                     executionOrder.setPrice(target);
-                    executionOrder.setOrderType("BUY");
+                    executionOrder.setOrderType(OrderType.BUY);
                     orderService.saveOrder(executionOrder);
                     logger.info("Buy signal at: " + target);
                 } catch (IllegalArgumentException e) {
