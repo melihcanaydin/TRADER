@@ -1,74 +1,48 @@
 package tradingbot.service.rule;
 
-import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import tradingbot.model.MarketData;
-import tradingbot.service.indicator.BollingerBandsService;
-import tradingbot.service.indicator.MACDService;
-import tradingbot.service.indicator.MovingAverageService;
-import tradingbot.service.indicator.OBVService;
-import tradingbot.service.indicator.RSIService;
+import tradingbot.service.analysis.MarketIndicators;
+import tradingbot.service.notification.NotificationService;
 
 @Service
 public class ExitRuleService {
 
-    private final MovingAverageService maService;
-    private final RSIService rsiService;
-    private final BollingerBandsService bbService;
-    private final MACDService macdService;
-    private final OBVService obvService;
+        private static final Logger log = LoggerFactory.getLogger(ExitRuleService.class);
 
-    public ExitRuleService(MovingAverageService maService,
-            RSIService rsiService,
-            BollingerBandsService bbService,
-            MACDService macdService,
-            OBVService obvService) {
-        this.maService = maService;
-        this.rsiService = rsiService;
-        this.bbService = bbService;
-        this.macdService = macdService;
-        this.obvService = obvService;
-    }
+        private final NotificationService telegramService;
 
-    public Boolean checkExitRules(List<MarketData> data) {
-        if (data == null || data.isEmpty()) {
-            throw new IllegalArgumentException("Market data cannot be null or empty.");
+        public ExitRuleService(NotificationService telegramService) {
+                this.telegramService = telegramService;
         }
 
-        // 1. Trend Reversal: 20-day MA < 50-day MA OR price < 200-day MA
-        Double ma20 = maService.calculateSMA(data, 20);
-        Double ma50 = maService.calculateSMA(data, 50);
-        Double ma200 = maService.calculateSMA(data, 200);
-        double currentPrice = data.get(data.size() - 1).getClosePrice();
-        boolean trendReversal = (ma20 != null && ma50 != null && ma200 != null)
-                && (ma20 < ma50 || currentPrice < ma200);
+        public boolean checkExitRules(MarketIndicators indicators) {
+                if (indicators == null) {
+                        throw new IllegalArgumentException("Market indicators cannot be null.");
+                }
 
-        // 2. Momentum Exhaustion: RSI(14) > 65 AND falling
-        Double rsi = rsiService.calculateRSI(data, 14);
-        boolean rsiExhausted = (rsi != null)
-                && (rsi > 65)
-                && !rsiService.isRisingRSI(data, 14); // RSI is not rising
+                boolean trendReversal = (indicators.ma20 != null && indicators.ma50 != null
+                                && indicators.ma200 != null)
+                                && (indicators.ma20 < indicators.ma50
+                                                || indicators.currentPrice < indicators.ma200);
 
-        // 3. Volatility Spike: Price at/piercing upper Bollinger Band
-        double[] bollingerBands = bbService.calculateBollingerBands(data);
-        boolean volatilitySpike = (bollingerBands != null)
-                && (currentPrice >= bollingerBands[0]); // Upper Bollinger Band
+                boolean rsiExhausted = (indicators.rsi != null) && (indicators.rsi > 65)
+                                && !indicators.rsiRising;
 
-        // 4. Confirmation: MACD bearish crossover + falling OBV
-        double[] macd = macdService.calculateMACD(data);
-        boolean macdBearish = (macd != null)
-                && (macd[0] < macd[1]); // MACD line < Signal line
+                boolean volatilitySpike = (indicators.bollingerBands != null)
+                                && (indicators.currentPrice >= indicators.bollingerBands[0]); // Upper
+                                                                                              // Bollinger
+                                                                                              // Band
 
-        Double obv = obvService.calculateOBV(data);
-        boolean obvFalling = (obv != null)
-                && !obvService.isRisingOBV(data); // OBV is not rising
+                boolean macdBearish = indicators.macdLine < indicators.signalLine;
+                boolean confirmationValid = macdBearish && !indicators.obvRising;
 
-        boolean confirmationValid = macdBearish && obvFalling;
+                boolean exitSignal = trendReversal || rsiExhausted || volatilitySpike
+                                || confirmationValid;
 
-        // Combine all exit conditions
-        //TODO: MCA; Put it && maybe
-        return trendReversal || rsiExhausted || volatilitySpike || confirmationValid;
-    }
+                log.info("📉 Exit Signal: {}", exitSignal);
+                return exitSignal;
+        }
 }

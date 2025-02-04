@@ -2,17 +2,49 @@ package tradingbot.model;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "execution_order") // ✅ Explicitly define the table name
 public class ExecutionOrder {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ Auto-increment ID
     private Long id;
+
     private String symbol;
+
+    @Enumerated(EnumType.STRING) // ✅ Store enum as a string
     private OrderType orderType;
+
     private Double price;
     private Double quantity;
     private Integer leverage;
     private Double trailingStop;
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    public ExecutionOrder() {
+        // ✅ Required Default Constructor for Hibernate
+    }
+
+    public ExecutionOrder(String symbol, OrderType orderType, Double price, Double quantity,
+            Integer leverage, Double trailingStop) {
+        this.symbol = symbol;
+        this.orderType = orderType;
+        this.price = price;
+        this.quantity = quantity;
+        this.leverage = leverage;
+        this.trailingStop = trailingStop;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    // ✅ Getters and Setters
     public Long getId() {
         return id;
     }

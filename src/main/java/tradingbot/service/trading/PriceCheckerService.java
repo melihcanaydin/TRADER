@@ -1,8 +1,7 @@
 package tradingbot.service.trading;
 
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,12 +9,13 @@ import org.springframework.stereotype.Service;
 
 import tradingbot.model.BuySuggestion;
 import tradingbot.model.Coin;
-import tradingbot.model.CoinData;
-import tradingbot.model.TradeSignal;
+import tradingbot.model.MarketData;
 import tradingbot.repository.BuySuggestionRepository;
 import tradingbot.repository.LogicRepository;
 import tradingbot.service.marketdata.MarketDataService;
-import tradingbot.service.strategy.MultiIndicatorStrategy;
+import tradingbot.service.notification.NotificationService;
+import tradingbot.service.strategy.TradingStrategyService;
+import tradingbot.service.strategy.TradingStrategyService.TradeDecision;
 
 @Service
 public class PriceCheckerService {
@@ -24,99 +24,82 @@ public class PriceCheckerService {
     private final LogicRepository logicRepository;
     private final MarketDataService marketDataService;
     private final BuySuggestionRepository buySuggestionRepository;
-    private final MultiIndicatorStrategy tradingStrategy;
+    private final NotificationService telegramService;
+    private final TradingStrategyService tradingStrategy;
 
     public PriceCheckerService(LogicRepository logicRepository, MarketDataService marketDataService,
-            BuySuggestionRepository buySuggestionRepository,
-            MultiIndicatorStrategy tradingStrategy) {
+            BuySuggestionRepository buySuggestionRepository, NotificationService telegramService,
+            TradingStrategyService tradingStrategy) {
         this.logicRepository = logicRepository;
         this.marketDataService = marketDataService;
         this.buySuggestionRepository = buySuggestionRepository;
         this.tradingStrategy = tradingStrategy;
+        this.telegramService = telegramService;
     }
+
+    private static final Logger log = LoggerFactory.getLogger(PriceCheckerService.class);
 
     @Scheduled(fixedRate = 60000)
     public void checkPrices() {
         for (Coin coin : Coin.values()) {
             try {
-                // Get all indicators
-                double price = marketDataService.getCurrentPrice(coin.name());
-                double rsi = marketDataService.getRSI(coin, 14);
-                double[] macd = marketDataService.getMACD(coin);
-                double[] bb = marketDataService.getBollingerBands(coin);
-                double atr = marketDataService.getATR(coin, 14);
-                double obv = marketDataService.getOBV(coin);
+                // ✅ Fetch historical market data
+                List<MarketData> marketDataList = marketDataService.getMarketData(coin);
 
-                // Create validated CoinData object
-                CoinData coinData = new CoinData(price, new double[] {}, // Fibonacci levels (TODO)
-                        rsi, marketDataService.getVolume(coin), 0.0, // Previous volume (TODO)
-                        marketDataService.getMovingAverages(coin, List.of(5, 20, 50, 200)),
-                        new HashMap<>(), macd[0], macd[1], bb[0], bb[1], atr, obv);
-
-                logicRepository.updateCoinData(coin, coinData);
-
-                // Generate trade signal
-                TradeSignal signal = tradingStrategy.evaluate(coinData);
-                if (signal.isBuy()) {
-                    // Save buy suggestion
+                if (marketDataList == null || marketDataList.isEmpty()) {
+                    logger.warn("Skipping {} due to missing market data", coin.name());
+                    continue;
                 }
+
+                // ✅ Evaluate trade decisions
+                TradeDecision tradeDecision = tradingStrategy.evaluateTrade(marketDataList);
+                MarketData latestData = marketDataList.get(0); // Latest candle
+
+                if (tradeDecision.shouldEnterTrade) {
+                    BuySuggestion suggestion =
+                            new BuySuggestion(latestData.getSymbol(), latestData.getClosePrice(),
+                                    tradeDecision.indicators.rsi, tradeDecision.indicators.macdLine,
+                                    tradeDecision.indicators.bollingerBands[0] // Upper BB
+                            );
+
+                    buySuggestionRepository.save(suggestion);
+                    logger.info("💹 Buy suggestion saved for {}", latestData.getSymbol());
+
+                    // ✅ Generate Buy Signal Message in HTML format
+                    String buyMessage = String.format(
+                            "<b>🚀 Buy Signal Detected! 🚀</b>\n" + "<b>Coin:</b> %s\n"
+                                    + "<b>Price:</b> <code>%.2f</code>\n"
+                                    + "<b>RSI (14):</b> <code>%.2f</code>\n"
+                                    + "<b>MACD Line:</b> <code>%.2f</code>\n"
+                                    + "<b>Bollinger Upper:</b> <code>%.2f</code>",
+                            latestData.getSymbol(), latestData.getClosePrice(),
+                            tradeDecision.indicators.rsi, tradeDecision.indicators.macdLine,
+                            tradeDecision.indicators.bollingerBands[0]);
+
+                    log.info(buyMessage);
+                    telegramService.sendMessage(buyMessage); // ✅ Unblock for real notifications
+                }
+
+                if (tradeDecision.shouldExitTrade) {
+                    // ✅ Generate Sell Signal Message in HTML format
+                    String sellMessage = String.format(
+                            "<b>⚠️ Sell Signal Detected! ⚠️</b>\n" + "<b>Coin:</b> %s\n"
+                                    + "<b>Price:</b> <code>%.2f</code>\n"
+                                    + "<b>RSI (14):</b> <code>%.2f</code>\n"
+                                    + "<b>MACD Line:</b> <code>%.2f</code>\n"
+                                    + "<b>Bollinger Lower:</b> <code>%.2f</code>",
+                            latestData.getSymbol(), latestData.getClosePrice(),
+                            tradeDecision.indicators.rsi, tradeDecision.indicators.macdLine,
+                            tradeDecision.indicators.bollingerBands[2]); // Lower BB
+
+                    log.info(sellMessage);
+                    telegramService.sendMessage(sellMessage);
+                    logger.info("📉 Sell signal triggered for {}", latestData.getSymbol());
+                }
+
             } catch (Exception e) {
-                logger.error("Failed to process {}", coin.name(), e);
+                logger.error("Failed to process {}: {}", coin.name(), e.getMessage(), e);
             }
-        }
-    }
-
-    private void processCoinData(Coin coin) {
-        logger.info("Processing data for {}", coin.name());
-
-        // Define the required period for indicators
-        int rsiPeriod = 14;
-        int atrPeriod = 14;
-
-        try {
-            // Fetch all required market data with the appropriate periods
-            double price = marketDataService.getCurrentPrice(coin.name());
-            double rsi = marketDataService.getRSI(coin, rsiPeriod);
-            double[] macd = marketDataService.getMACD(coin);
-            double[] bb = marketDataService.getBollingerBands(coin);
-            double atr = marketDataService.getATR(coin, atrPeriod);
-            double obv = marketDataService.getOBV(coin);
-
-            // Validate indicator data
-            if (macd == null || bb == null) {
-                logger.warn("Skipping {} due to insufficient data for indicators", coin.name());
-                return;
-            }
-
-            // Create CoinData with full indicator values
-            CoinData coinData = new CoinData(price, // price
-                    new double[] {}, // fibonacciLevels (empty for now)
-                    rsi, // rsi
-                    0.0, // volume (not used in this example)
-                    0.0, // previousVolume (not used in this example)
-                    new HashMap<>(), // movingAverages (empty for now)
-                    new HashMap<>(), // previousMovingAverages (empty for now)
-                    macd[0], // macdLine
-                    macd[1], // signalLine
-                    bb[0], // upperBollinger
-                    bb[1], // lowerBollinger
-                    atr, // atr
-                    obv // obv
-            );
-
-            // Update coin data in the repository
-            logicRepository.updateCoinData(coinData);
-
-            // Evaluate trading strategy
-            TradeSignal signal = tradingStrategy.evaluate(coinData);
-            if (signal.isBuy()) {
-                BuySuggestion suggestion = new BuySuggestion(coin.name(), coinData.getPrice(),
-                        coinData.getRsi(), coinData.getMacdLine(), coinData.getUpperBollinger());
-                buySuggestionRepository.save(suggestion);
-                logger.info("Buy suggestion saved for {}", coin.name());
-            }
-        } catch (Exception e) {
-            logger.error("Error processing data for {}: {}", coin.name(), e.getMessage(), e);
         }
     }
 }

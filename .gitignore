@@ -1,19 +1,62 @@
-# Compiled class files
-*.class
-
-# Maven build directory
+# Maven target directory (compiled code and build output)
 target/
+
+# IntelliJ IDEA project files
+.idea/
+*.iml
+
+# VSCode workspace settings
+.vscode/
+
+# MacOS system files
+.DS_Store
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+
+# Compiled Java class files
+*.class
 
 # Log files
 *.log
-
-# IDE directories
-.idea/
-.vscode/
-
-# macOS system files
-.DS_Store
-
-.env
-
 logs/
+logback.xml
+
+# Environment and configuration files
+.env
+*.properties
+!src/main/resources/application.yml
+!src/main/resources/application-dev.yml
+!src/main/resources/application-prod.yml
+src/main/resources/application.properties
+
+# Ignore sensitive files
+*.key
+*.pem
+*.crt
+
+# Ignore Maven wrapper files except needed ones
+mvnw.cmd
+mvnw
+.mvn/
+
+# Ignore Postman collections except the one committed
+*.postman_collection.json
+!VideoStreamingAPI.postman_collection.json
+
+# Ignore test reports and coverage reports
+surefire-reports/
+jacoco/
+
+# Ignore compiled test classes
+target/test-classes/
+
+# Ignore build artifacts
+*.war
+*.jar
+*.ear
+
+# Ignore system-specific files
+Thumbs.db

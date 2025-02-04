@@ -45,26 +45,29 @@ public class MarketData {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    public MarketData(String symbol, Long openTime, double open, double high, double low, double close, double volume, Long closeTime) {
-        this.symbol = symbol;
-        this.createdAt = LocalDateTime.now(); // Automatically set createdAt to the current time
-        this.interval = "N/A"; // Default interval if not provided
+    // ✅ Add a default constructor for Hibernate
+    public MarketData() {}
 
-        // Set price and volume data
+    public MarketData(String symbol, Long openTime, double open, double high, double low,
+            double close, double volume, Long closeTime) {
+        this.symbol = symbol;
+        this.createdAt = LocalDateTime.now();
+        this.interval = "N/A";
+
         this.closePrice = close;
         this.highPrice = high;
         this.lowPrice = low;
         this.volume = volume;
 
-        // Moving averages and RSI default to null or 0
         this.movingAverage5 = null;
         this.movingAverage8 = null;
         this.movingAverage21 = null;
         this.rsi = 0;
     }
 
-    // Parameterized constructor
-    public MarketData(String symbol, String interval, double closePrice, double highPrice, double lowPrice, double volume, Double movingAverage5, Double movingAverage8, Double movingAverage21, double rsi, LocalDateTime createdAt) {
+    public MarketData(String symbol, String interval, double closePrice, double highPrice,
+            double lowPrice, double volume, Double movingAverage5, Double movingAverage8,
+            Double movingAverage21, double rsi, LocalDateTime createdAt) {
         this.symbol = symbol;
         this.interval = interval;
         this.closePrice = closePrice;
@@ -78,7 +81,6 @@ public class MarketData {
         this.createdAt = createdAt;
     }
 
-    // Getters and setters
     public Long getId() {
         return id;
     }
@@ -174,4 +176,6 @@ public class MarketData {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+
 }

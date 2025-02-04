@@ -2,28 +2,48 @@ package tradingbot.model;
 
 import java.util.Map;
 
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import tradingbot.util.JsonMapConverter;
+
+@Entity
+@Table(name = "coin_data")
 public class CoinData {
 
-    private final double price;
-    private final double[] fibonacciLevels;
-    private final double rsi;
-    private final double volume;
-    private final double previousVolume;
-    private final Map<Integer, Double> movingAverages;
-    private final Map<Integer, Double> previousMovingAverages;
+    @Id
+    private String coinName; // ✅ Primary Key
 
-    // New fields for multi-indicator strategy
-    private final double macdLine;          // MACD line (12-day EMA - 26-day EMA)
-    private final double signalLine;        // Signal line (9-day EMA of MACD)
-    private final double upperBollinger;    // Upper Bollinger Band
-    private final double lowerBollinger;    // Lower Bollinger Band
-    private final double atr;               // Average True Range (14-period)
-    private final double obv;               // On-Balance Volume
+    private double price;
+    private double[] fibonacciLevels;
+    private double rsi;
+    private double volume;
+    private double previousVolume;
 
-    public CoinData(double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume,
-            Map<Integer, Double> movingAverages, Map<Integer, Double> previousMovingAverages,
-            double macdLine, double signalLine, double upperBollinger, double lowerBollinger,
-            double atr, double obv) {
+    @Convert(converter = JsonMapConverter.class) // ✅ Convert Map to JSON
+    private Map<Integer, Double> movingAverages;
+
+    @Convert(converter = JsonMapConverter.class) // ✅ Convert Map to JSON
+    private Map<Integer, Double> previousMovingAverages;
+
+    private double macdLine;
+    private double signalLine;
+    private double upperBollinger;
+    private double lowerBollinger;
+    private double atr;
+    private double obv;
+
+    public CoinData() {
+        // Default constructor required by JPA
+    }
+
+    public CoinData(String coinName, double price, double[] fibonacciLevels, double rsi,
+            double volume, double previousVolume, Map<Integer, Double> movingAverages,
+            Map<Integer, Double> previousMovingAverages, double macdLine, double signalLine,
+            double upperBollinger, double lowerBollinger, double atr, double obv) {
+        this.coinName = coinName;
         this.price = price;
         this.fibonacciLevels = fibonacciLevels;
         this.rsi = rsi;
@@ -39,7 +59,21 @@ public class CoinData {
         this.obv = obv;
     }
 
-    // Getters for existing fields
+    // ✅ Restore missing getMovingAverage() method
+    public Double getMovingAverage(int period) {
+        return movingAverages != null ? movingAverages.getOrDefault(period, 0.0) : 0.0;
+    }
+
+    public Double getPreviousMovingAverage(int period) {
+        return previousMovingAverages != null ? previousMovingAverages.getOrDefault(period, 0.0)
+                : 0.0;
+    }
+
+    // ✅ Getters
+    public String getCoinName() {
+        return coinName;
+    }
+
     public double getPrice() {
         return price;
     }
@@ -60,15 +94,6 @@ public class CoinData {
         return previousVolume;
     }
 
-    public Map<Integer, Double> getMovingAverages() {
-        return movingAverages;
-    }
-
-    public Map<Integer, Double> getPreviousMovingAverages() {
-        return previousMovingAverages;
-    }
-
-    // Getters for new fields
     public double getMacdLine() {
         return macdLine;
     }
@@ -91,14 +116,5 @@ public class CoinData {
 
     public double getObv() {
         return obv;
-    }
-
-    // Helper methods for moving averages
-    public double getMovingAverage(int period) {
-        return movingAverages.getOrDefault(period, 0.0);
-    }
-
-    public double getPreviousMovingAverage(int period) {
-        return previousMovingAverages.getOrDefault(period, 0.0);
     }
 }

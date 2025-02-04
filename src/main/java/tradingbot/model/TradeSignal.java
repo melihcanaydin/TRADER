@@ -1,19 +1,36 @@
 package tradingbot.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "trade_signal") // ✅ Ensure correct table name
 public class TradeSignal {
 
-    public static final TradeSignal NO_SIGNAL = new TradeSignal("HOLD");
+    @Id // ✅ Primary Key: Use coinName
+    private String coinName;
+
+    public static final TradeSignal NO_SIGNAL = new TradeSignal("NO_COIN", "HOLD");
 
     private String action;
     private Double positionSize;
     private Integer leverage;
     private Double trailingStop;
 
-    public TradeSignal(String action) {
+    public TradeSignal() {
+        // Default constructor required by JPA
+    }
+
+    // ✅ Fix: Added constructor with default `coinName`
+    public TradeSignal(String coinName, String action) {
+        this.coinName = coinName;
         this.action = action;
     }
 
-    public TradeSignal(String action, Double positionSize, Integer leverage, Double trailingStop) {
+    public TradeSignal(String coinName, String action, Double positionSize, Integer leverage,
+            Double trailingStop) {
+        this.coinName = coinName;
         this.action = action;
         this.positionSize = positionSize;
         this.leverage = leverage;
@@ -22,6 +39,15 @@ public class TradeSignal {
 
     public static TradeSignal getNoSignal() {
         return NO_SIGNAL;
+    }
+
+    // ✅ Getter & Setter for coinName
+    public String getCoinName() {
+        return coinName;
+    }
+
+    public void setCoinName(String coinName) {
+        this.coinName = coinName;
     }
 
     public String getAction() {
@@ -59,5 +85,4 @@ public class TradeSignal {
     public boolean isBuy() {
         return "BUY".equalsIgnoreCase(this.action);
     }
-
 }

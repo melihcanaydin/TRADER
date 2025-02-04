@@ -1,67 +1,47 @@
 package tradingbot.service.rule;
 
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import tradingbot.model.MarketData;
-import tradingbot.service.indicator.*;
+
+import tradingbot.service.analysis.MarketIndicators;
+import tradingbot.service.notification.NotificationService;
 
 @Service
 public class EntryRuleService {
 
-    private final MovingAverageService maService;
-    private final RSIService rsiService;
-    private final BollingerBandsService bbService;
-    private final MACDService macdService;
-    private final OBVService obvService;
+        private static final Logger log = LoggerFactory.getLogger(EntryRuleService.class);
 
-    public EntryRuleService(MovingAverageService maService,
-            RSIService rsiService,
-            BollingerBandsService bbService,
-            MACDService macdService,
-            OBVService obvService) {
-        this.maService = maService;
-        this.rsiService = rsiService;
-        this.bbService = bbService;
-        this.macdService = macdService;
-        this.obvService = obvService;
-    }
+        private final NotificationService telegramService;
 
-    public Boolean checkEntryRules(List<MarketData> data) {
-        if (data == null || data.isEmpty()) {
-            throw new IllegalArgumentException("Market data cannot be null or empty.");
+        public EntryRuleService(NotificationService telegramService) {
+                this.telegramService = telegramService;
         }
 
-        // 1. Trend: 20-day MA > 50-day MA AND price > 200-day MA
-        Double ma20 = maService.calculateSMA(data, 20);
-        Double ma50 = maService.calculateSMA(data, 50);
-        Double ma200 = maService.calculateSMA(data, 200);
-        double currentPrice = data.get(data.size() - 1).getClosePrice();
-        boolean trendValid = (ma20 != null && ma50 != null && ma200 != null)
-                && (ma20 > ma50) && (currentPrice > ma200);
+        public boolean checkEntryRules(MarketIndicators indicators) {
+                if (indicators == null) {
+                        throw new IllegalArgumentException("Market indicators cannot be null.");
+                }
 
-        // 2. Momentum: RSI(14) < 35 AND rising
-        Double rsi = rsiService.calculateRSI(data, 14);
-        boolean rsiValid = (rsi != null)
-                && (rsi < 35)
-                && rsiService.isRisingRSI(data, 14);
+                boolean trendValid = (indicators.ma20 != null && indicators.ma50 != null
+                                && indicators.ma200 != null) && (indicators.ma20 > indicators.ma50)
+                                && (indicators.currentPrice > indicators.ma200);
 
-        // 3. Volatility: Price at/piercing lower Bollinger Band
-        double[] bollingerBands = bbService.calculateBollingerBands(data);
-        boolean volatilityValid = (bollingerBands != null)
-                && (currentPrice <= bollingerBands[1]); // Lower Bollinger Band
+                boolean rsiValid = (indicators.rsi != null) && (indicators.rsi < 35)
+                                && indicators.rsiRising;
 
-        // 4. Confirmation: MACD bullish crossover + rising OBV
-        double[] macd = macdService.calculateMACD(data);
-        boolean macdBullish = (macd != null)
-                && (macd[0] > macd[1]); // MACD line > Signal line
+                boolean volatilityValid = (indicators.bollingerBands != null)
+                                && (indicators.currentPrice <= indicators.bollingerBands[2]); // Lower
+                                                                                              // Bollinger
+                                                                                              // Band
 
-        Double obv = obvService.calculateOBV(data);
-        boolean obvRising = (obv != null)
-                && obvService.isRisingOBV(data);
+                boolean macdBullish = indicators.macdLine > indicators.signalLine;
+                boolean confirmationValid = macdBullish && indicators.obvRising;
 
-        boolean confirmationValid = macdBullish && obvRising;
+                boolean entrySignal =
+                                trendValid && rsiValid && volatilityValid && confirmationValid;
 
-        // Combine all entry conditions
-        return trendValid && rsiValid && volatilityValid && confirmationValid;
-    }
+                log.info("📈 Entry Signal: {}", entrySignal);
+                return entrySignal;
+        }
 }

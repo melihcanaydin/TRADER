@@ -2,12 +2,16 @@ package tradingbot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import tradingbot.config.EnvConfigPropertySource;
 
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = "tradingbot.repository") // ✅ Ensures repositories are scanned
+@EntityScan(basePackages = "tradingbot.model") // ✅ Ensures Hibernate detects `ExecutionOrder`
 @EnableScheduling
 public class TradingBotApplication {
 
@@ -21,4 +25,4 @@ public class TradingBotApplication {
     }
 }
 
-// TODO: MCA Quartz öğren ve scheduled yerine kullan 
+// TODO: MCA Quartz öğren ve scheduled yerine kullan
