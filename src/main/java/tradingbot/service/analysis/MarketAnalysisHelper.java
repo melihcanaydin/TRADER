@@ -32,29 +32,24 @@ public class MarketAnalysisHelper {
                 MarketData latestData = data.get(0);
                 double currentPrice = latestData.getClosePrice();
 
-                // ✅ Calculate Moving Averages
-                List<MarketData> last20 = data.subList(0, Math.min(20, data.size()));
-                List<MarketData> last50 = data.subList(0, Math.min(50, data.size()));
-                List<MarketData> last200 = data.subList(0, Math.min(200, data.size()));
-
-                Double ma20 = analysisService.calculateSMA(last20, 20);
-                Double ma50 = analysisService.calculateSMA(last50, 50);
-                Double ma200 = analysisService.calculateSMA(last200, 200);
+                Double ma20 = analysisService.calculateSMA(data, 20);
+                Double ma50 = analysisService.calculateSMA(data, 50);
+                Double ma200 = analysisService.calculateSMA(data, 200);
 
                 // ✅ Calculate RSI
                 Double rsi = analysisService
-                                .calculateRSI(data.subList(0, Math.min(14, data.size())), 14);
+                                .calculateRSI(data.subList(0, Math.min(15, data.size())), 14);
                 boolean rsiRising = analysisService
-                                .isRisingRSI(data.subList(0, Math.min(14, data.size())), 14);
+                                .isRisingRSI(data.subList(0, Math.min(15, data.size())), 14);
 
                 // ✅ Calculate Bollinger Bands
-                double[] bollingerBands = analysisService.calculateBollingerBands(last20, 20);
+                double[] bollingerBands = analysisService.calculateBollingerBands(data, 20);
 
                 // ✅ Calculate MACD & Signal Line
-                double macdLine = analysisService
-                                .calculateMACD(data.subList(0, Math.min(26, data.size())));
-                double signalLine = analysisService
-                                .calculateSignalLine(data.subList(0, Math.min(9, data.size())));
+
+                double macdLine = analysisService.calculateMACD(data);
+                double signalLine = analysisService.calculateSignalLine(data); // ✅ Corresponding
+                                                                               // Signal Line
 
                 // ✅ Calculate OBV
                 Double obv = analysisService.calculateOBV(data);
@@ -85,7 +80,8 @@ public class MarketAnalysisHelper {
                                 bollingerBands[1], bollingerBands[2], macdLine, signalLine, obv,
                                 obvRising ? "📈 Rising ✅" : "📉 Falling ❌");
 
-                telegramService.sendMessage(message);
+                // telegramService.sendMessage(message);
+                log.info(message);
                 log.info("📊 Sent detailed indicator analysis to Telegram for {}",
                                 latestData.getSymbol());
 

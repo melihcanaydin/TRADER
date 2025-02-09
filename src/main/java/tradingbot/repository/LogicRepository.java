@@ -1,12 +1,10 @@
 package tradingbot.repository;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import tradingbot.model.Coin;
@@ -31,23 +29,23 @@ public class LogicRepository {
     }
 
     public void analyzeMarketData(MarketData marketData) {
-        List<MarketData> historicalData =
-                marketDataRepository.findRecentData(marketData.getSymbol(), PageRequest.of(0, 30));
+        // List<MarketData> historicalData =
+        // marketDataRepository.findRecentData(marketData.getSymbol(), PageRequest.of(0, 30));
 
-        if (historicalData.size() < 26) {
-            log.warn("Not enough historical data for indicator calculations.");
-            return;
-        }
+        // if (historicalData.size() < 26) {
+        // log.warn("Not enough historical data for indicator calculations.");
+        // return;
+        // }
 
-        double macd = analysisService.calculateMACD(historicalData);
-        double signalLine = analysisService.calculateSignalLine(historicalData);
-        double atr = analysisService.calculateATR(historicalData, 14);
-        double obv = analysisService.calculateOBV(historicalData);
-        double[] bb = analysisService.calculateBollingerBands(historicalData, 20);
+        // double macd = analysisService.calculateMACD(historicalData);
+        // double signalLine = analysisService.calculateSignalLine(historicalData);
+        // double atr = analysisService.calculateATR(historicalData, 14);
+        // double obv = analysisService.calculateOBV(historicalData);
+        // double[] bb = analysisService.calculateBollingerBands(historicalData, 20);
 
-        log.info("Computed MACD: {}, Signal Line: {}, ATR: {}, OBV: {}", macd, signalLine, atr,
-                obv);
-        log.info("Bollinger Bands - Upper: {}, Middle: {}, Lower: {}", bb[0], bb[1], bb[2]);
+        // log.info("Computed MACD: {}, Signal Line: {}, ATR: {}, OBV: {}", macd, signalLine, atr,
+        // obv);
+        // log.info("Bollinger Bands - Upper: {}, Middle: {}, Lower: {}", bb[0], bb[1], bb[2]);
     }
 
     /**

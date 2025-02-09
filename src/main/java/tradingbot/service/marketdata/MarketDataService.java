@@ -54,29 +54,28 @@ public class MarketDataService {
     }
 
     public List<MarketData> getMarketData(Coin coin) {
-        List<MarketData> marketDataList =
-                marketDataRepository.findTop201BySymbolOrderByCreatedAtDesc(coin.name());
+        // Invalidate Caches here in the future to hold info on DB
 
-        if (marketDataList.size() < 201) {
-            logger.warn("Insufficient market data in DB for {}. Fetching from Binance API.",
-                    coin.name());
 
-            // ✅ Now fetching via BinanceService instead of calling binanceApiClient directly
-            List<CandlestickDto> candlestickDtos = binanceService
-                    .getHistoricalCandlesticks(coin.name(), CandlestickInterval.DAILY, 201);
+        logger.warn("Insufficient market data in DB for {}. Fetching from Binance API.",
+                coin.name());
 
-            List<MarketData> parsedMarketData = candlestickDtos.stream()
-                    .map(dto -> new MarketData(coin.name(), dto.getOpenTime(),
-                            Double.parseDouble(dto.getOpen()), Double.parseDouble(dto.getHigh()),
-                            Double.parseDouble(dto.getLow()), Double.parseDouble(dto.getClose()),
-                            Double.parseDouble(dto.getVolume()), dto.getCloseTime()))
-                    .collect(Collectors.toList());
+        // ✅ Now fetching via BinanceService instead of calling binanceApiClient directly
+        List<CandlestickDto> candlestickDtos = binanceService
+                .getHistoricalCandlesticks(coin.name(), CandlestickInterval.DAILY, 201).stream()
+                .sorted((a, b) -> Long.compare(b.getOpenTime(), a.getOpenTime()))
+                .collect(Collectors.toList());
 
-            saveMarketData(parsedMarketData);
-            return parsedMarketData;
-        }
+        List<MarketData> parsedMarketData = candlestickDtos.stream()
+                .map(dto -> new MarketData(coin.name(), dto.getOpenTime(),
+                        Double.parseDouble(dto.getOpen()), Double.parseDouble(dto.getHigh()),
+                        Double.parseDouble(dto.getLow()), Double.parseDouble(dto.getClose()),
+                        Double.parseDouble(dto.getVolume()), dto.getCloseTime()))
+                .collect(Collectors.toList());
 
-        return marketDataList;
+        // saveMarketData(parsedMarketData);
+        return parsedMarketData;
+
     }
 
     public void saveMarketData(List<MarketData> marketDataList) {
