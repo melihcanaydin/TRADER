@@ -11,16 +11,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "execution_order") // ✅ Explicitly define the table name
+@Table(name = "execution_order")
 public class ExecutionOrder {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ✅ Auto-increment ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String symbol;
 
-    @Enumerated(EnumType.STRING) // ✅ Store enum as a string
+    @Enumerated(EnumType.STRING)
     private OrderType orderType;
 
     private Double price;
@@ -29,9 +29,7 @@ public class ExecutionOrder {
     private Double trailingStop;
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public ExecutionOrder() {
-        // ✅ Required Default Constructor for Hibernate
-    }
+    public ExecutionOrder() {}
 
     public ExecutionOrder(String symbol, OrderType orderType, Double price, Double quantity,
             Integer leverage, Double trailingStop) {
@@ -44,7 +42,6 @@ public class ExecutionOrder {
         this.timestamp = LocalDateTime.now();
     }
 
-    // ✅ Getters and Setters
     public Long getId() {
         return id;
     }

@@ -14,7 +14,7 @@ import tradingbot.util.JsonMapConverter;
 public class CoinData {
 
     @Id
-    private String coinName; // ✅ Primary Key
+    private String coinName;
 
     private double price;
     private double[] fibonacciLevels;
@@ -22,10 +22,10 @@ public class CoinData {
     private double volume;
     private double previousVolume;
 
-    @Convert(converter = JsonMapConverter.class) // ✅ Convert Map to JSON
+    @Convert(converter = JsonMapConverter.class)
     private Map<Integer, Double> movingAverages;
 
-    @Convert(converter = JsonMapConverter.class) // ✅ Convert Map to JSON
+    @Convert(converter = JsonMapConverter.class)
     private Map<Integer, Double> previousMovingAverages;
 
     private double macdLine;
@@ -35,9 +35,7 @@ public class CoinData {
     private double atr;
     private double obv;
 
-    public CoinData() {
-        // Default constructor required by JPA
-    }
+    public CoinData() {}
 
     public CoinData(String coinName, double price, double[] fibonacciLevels, double rsi,
             double volume, double previousVolume, Map<Integer, Double> movingAverages,
@@ -59,7 +57,6 @@ public class CoinData {
         this.obv = obv;
     }
 
-    // ✅ Restore missing getMovingAverage() method
     public Double getMovingAverage(int period) {
         return movingAverages != null ? movingAverages.getOrDefault(period, 0.0) : 0.0;
     }
@@ -69,7 +66,6 @@ public class CoinData {
                 : 0.0;
     }
 
-    // ✅ Getters
     public String getCoinName() {
         return coinName;
     }

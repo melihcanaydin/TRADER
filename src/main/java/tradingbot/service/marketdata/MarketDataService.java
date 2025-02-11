@@ -60,7 +60,6 @@ public class MarketDataService {
         logger.warn("Insufficient market data in DB for {}. Fetching from Binance API.",
                 coin.name());
 
-        // ✅ Now fetching via BinanceService instead of calling binanceApiClient directly
         List<CandlestickDto> candlestickDtos = binanceService
                 .getHistoricalCandlesticks(coin.name(), CandlestickInterval.DAILY, 201).stream()
                 .sorted((a, b) -> Long.compare(b.getOpenTime(), a.getOpenTime()))

@@ -17,7 +17,7 @@ public class JsonMapConverter implements AttributeConverter<Map<Integer, Double>
     @Override
     public String convertToDatabaseColumn(Map<Integer, Double> attribute) {
         if (attribute == null || attribute.isEmpty()) {
-            return "{}"; // Store as empty JSON object
+            return "{}";
         }
         try {
             return objectMapper.writeValueAsString(attribute);
@@ -29,7 +29,7 @@ public class JsonMapConverter implements AttributeConverter<Map<Integer, Double>
     @Override
     public Map<Integer, Double> convertToEntityAttribute(String dbData) {
         if (dbData == null || dbData.isEmpty()) {
-            return new HashMap<>(); // Return empty map if no data
+            return new HashMap<>();
         }
         try {
             return objectMapper.readValue(dbData, new TypeReference<Map<Integer, Double>>() {});

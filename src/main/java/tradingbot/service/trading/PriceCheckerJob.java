@@ -31,12 +31,11 @@ public class PriceCheckerJob implements Job {
     @Autowired
     private NotificationService telegramService;
 
-    public PriceCheckerJob() { // ✅ No-arg constructor required by Quartz
-    }
+    public PriceCheckerJob() {}
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        if (context == null) { // ✅ Prevents NullPointerException
+        if (context == null) {
             logger.error("⚠️ JobExecutionContext is null! This job should only be run by Quartz.");
             return;
         }

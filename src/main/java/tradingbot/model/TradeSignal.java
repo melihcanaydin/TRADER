@@ -5,10 +5,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "trade_signal") // ✅ Ensure correct table name
+@Table(name = "trade_signal")
 public class TradeSignal {
 
-    @Id // ✅ Primary Key: Use coinName
+    @Id
     private String coinName;
 
     public static final TradeSignal NO_SIGNAL = new TradeSignal("NO_COIN", "HOLD");
@@ -18,11 +18,8 @@ public class TradeSignal {
     private Integer leverage;
     private Double trailingStop;
 
-    public TradeSignal() {
-        // Default constructor required by JPA
-    }
+    public TradeSignal() {}
 
-    // ✅ Fix: Added constructor with default `coinName`
     public TradeSignal(String coinName, String action) {
         this.coinName = coinName;
         this.action = action;
@@ -41,7 +38,6 @@ public class TradeSignal {
         return NO_SIGNAL;
     }
 
-    // ✅ Getter & Setter for coinName
     public String getCoinName() {
         return coinName;
     }

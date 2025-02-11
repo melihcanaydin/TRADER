@@ -48,9 +48,6 @@ public class LogicRepository {
         // log.info("Bollinger Bands - Upper: {}, Middle: {}, Lower: {}", bb[0], bb[1], bb[2]);
     }
 
-    /**
-     * Updates CoinData for a given coin.
-     */
     public void updateCoinData(Coin coin, CoinData coinData) {
         coinDataMap.put(coin, coinData);
         log.info("Updated CoinData for {}", coin);

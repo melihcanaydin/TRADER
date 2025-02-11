@@ -15,8 +15,8 @@ public class JobConfig {
 
     @Bean
     public JobDetail jobDetail() {
-        return JobBuilder.newJob(PriceCheckerJob.class) // ✅ No need for explicit casting
-                .withIdentity("priceCheckerJob").storeDurably().build();
+        return JobBuilder.newJob(PriceCheckerJob.class).withIdentity("priceCheckerJob")
+                .storeDurably().build();
     }
 
     @Bean

@@ -21,7 +21,6 @@ public class BuySuggestion {
     private double upperBollinger;
     private LocalDateTime suggestionDate = LocalDateTime.now();
 
-    // ✅ New Constructor with Parameters
     public BuySuggestion(String coinName, double buyPrice, double rsi, double macdLine,
             double upperBollinger) {
         this.coinName = coinName;
@@ -29,10 +28,9 @@ public class BuySuggestion {
         this.rsi = rsi;
         this.macdLine = macdLine;
         this.upperBollinger = upperBollinger;
-        this.suggestionDate = LocalDateTime.now(); // Automatically set the date
+        this.suggestionDate = LocalDateTime.now();
     }
 
-    // ✅ Default constructor (needed for JPA)
     public BuySuggestion() {}
 
     public Long getId() {

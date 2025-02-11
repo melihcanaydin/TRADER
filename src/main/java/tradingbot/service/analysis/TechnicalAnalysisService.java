@@ -327,7 +327,6 @@ public class TechnicalAnalysisService {
         }
 
         double multiplier = 2.0 / (period + 1);
-        // Start with simple average
         double ema = values.stream().limit(period).mapToDouble(Double::doubleValue).sum() / period;
 
         for (int i = period; i < values.size(); i++) {

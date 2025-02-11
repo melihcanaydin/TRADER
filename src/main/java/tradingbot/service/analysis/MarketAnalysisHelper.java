@@ -15,7 +15,7 @@ public class MarketAnalysisHelper {
         private static final Logger log = LoggerFactory.getLogger(MarketAnalysisHelper.class);
 
         private final TechnicalAnalysisService analysisService;
-        private final NotificationService telegramService; // ✅ Add Telegram service
+        private final NotificationService telegramService;
 
         public MarketAnalysisHelper(TechnicalAnalysisService analysisService,
                         NotificationService telegramService) {
@@ -28,7 +28,6 @@ public class MarketAnalysisHelper {
                         throw new IllegalArgumentException("Market data cannot be null or empty.");
                 }
 
-                // ✅ Get latest market data point
                 MarketData latestData = data.get(0);
                 double currentPrice = latestData.getClosePrice();
 
@@ -36,22 +35,22 @@ public class MarketAnalysisHelper {
                 Double ma50 = analysisService.calculateSMA(data, 50);
                 Double ma200 = analysisService.calculateSMA(data, 200);
 
-                // ✅ Calculate RSI
+                // Calculate RSI
                 Double rsi = analysisService
                                 .calculateRSI(data.subList(0, Math.min(15, data.size())), 14);
                 boolean rsiRising = analysisService
                                 .isRisingRSI(data.subList(0, Math.min(15, data.size())), 14);
 
-                // ✅ Calculate Bollinger Bands
+                // Calculate Bollinger Bands
                 double[] bollingerBands = analysisService.calculateBollingerBands(data, 20);
 
-                // ✅ Calculate MACD & Signal Line
+                // Calculate MACD & Signal Line
 
                 double macdLine = analysisService.calculateMACD(data);
                 double signalLine = analysisService.calculateSignalLine(data); // ✅ Corresponding
                                                                                // Signal Line
 
-                // ✅ Calculate OBV
+                // Calculate OBV
                 Double obv = analysisService.calculateOBV(data);
                 boolean obvRising = (obv != null) && obv > 0;
 

@@ -29,23 +29,20 @@ public class TradingStrategyService {
             throw new IllegalArgumentException("Market data cannot be null or empty.");
         }
 
-        // ✅ Compute indicators **once** and reuse them
         MarketIndicators indicators = analysisHelper.calculateIndicators(data);
 
         boolean shouldEnter = entryRuleService.checkEntryRules(indicators);
         boolean shouldExit = exitRuleService.checkExitRules(indicators);
 
-        // ✅ Ensuring that both cannot be true at the same time
         if (shouldEnter) {
-            shouldExit = false; // If we have an entry signal, we cannot exit.
+            shouldExit = false;
         } else if (shouldExit) {
-            shouldEnter = false; // If we have an exit signal, we cannot enter.
+            shouldEnter = false;
         }
 
         return new TradeDecision(shouldEnter, shouldExit, indicators);
     }
 
-    // ✅ Wrapper class to store trade decisions
     public static class TradeDecision {
         public final boolean shouldEnterTrade;
         public final boolean shouldExitTrade;
