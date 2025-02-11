@@ -80,7 +80,7 @@ public class MarketAnalysisHelper {
                                 bollingerBands[1], bollingerBands[2], macdLine, signalLine, obv,
                                 obvRising ? "📈 Rising ✅" : "📉 Falling ❌");
 
-                // telegramService.sendMessage(message);
+                telegramService.sendMessage(message);
                 log.info(message);
                 log.info("📊 Sent detailed indicator analysis to Telegram for {}",
                                 latestData.getSymbol());

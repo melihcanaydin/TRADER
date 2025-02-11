@@ -1,5 +1,10 @@
 package tradingbot;
 
+import org.quartz.JobKey;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -10,10 +15,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import tradingbot.config.EnvConfigPropertySource;
 
 @SpringBootApplication
-@EnableJpaRepositories(basePackages = "tradingbot.repository") // ✅ Ensures repositories are scanned
-@EntityScan(basePackages = "tradingbot.model") // ✅ Ensures Hibernate detects `ExecutionOrder`
+@EnableJpaRepositories(basePackages = "tradingbot.repository")
+@EntityScan(basePackages = "tradingbot.model")
 @EnableScheduling
-public class TradingBotApplication {
+public class TradingBotApplication implements CommandLineRunner {
+    @Autowired
+    private Scheduler scheduler;
 
     public static void main(String[] args) {
         SpringApplication application = new SpringApplication(TradingBotApplication.class);
@@ -21,8 +28,12 @@ public class TradingBotApplication {
             ConfigurableEnvironment environment = context.getEnvironment();
             environment.getPropertySources().addFirst(new EnvConfigPropertySource("envConfig"));
         });
+
         application.run(args);
     }
-}
 
-// TODO: MCA Quartz öğren ve scheduled yerine kullan
+    @Override
+    public void run(String... args) throws SchedulerException {
+        scheduler.triggerJob(new JobKey("priceCheckerJob"));
+    }
+}
