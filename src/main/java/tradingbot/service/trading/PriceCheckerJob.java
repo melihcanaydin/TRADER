@@ -86,7 +86,7 @@ public class PriceCheckerJob implements Job {
                 tradeDecision.indicators.obv);
 
         logger.info(buyMessage);
-        // telegramService.sendMessage(buyMessage);
+        telegramService.sendMessage(buyMessage);
     }
 
     private void handleSellSignal(MarketData latestData, TradeDecision tradeDecision) {
@@ -102,6 +102,6 @@ public class PriceCheckerJob implements Job {
                 tradeDecision.indicators.obv);
 
         logger.info(sellMessage);
-        // telegramService.sendMessage(sellMessage);
+        telegramService.sendMessage(sellMessage);
     }
 }
