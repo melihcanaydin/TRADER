@@ -16,17 +16,22 @@ public class BuySuggestion {
 
     private String coinName;
     private double buyPrice;
-    private LocalDateTime suggestionDate;
+    private double rsi;
+    private double macdLine;
+    private double upperBollinger;
+    private LocalDateTime suggestionDate = LocalDateTime.now();
 
-    public BuySuggestion() {
-        this.suggestionDate = LocalDateTime.now();
-    }
-
-    public BuySuggestion(String coinName, double buyPrice) {
+    public BuySuggestion(String coinName, double buyPrice, double rsi, double macdLine,
+            double upperBollinger) {
         this.coinName = coinName;
         this.buyPrice = buyPrice;
+        this.rsi = rsi;
+        this.macdLine = macdLine;
+        this.upperBollinger = upperBollinger;
         this.suggestionDate = LocalDateTime.now();
     }
+
+    public BuySuggestion() {}
 
     public Long getId() {
         return id;
@@ -50,6 +55,30 @@ public class BuySuggestion {
 
     public void setBuyPrice(double buyPrice) {
         this.buyPrice = buyPrice;
+    }
+
+    public double getRsi() {
+        return rsi;
+    }
+
+    public void setRsi(double rsi) {
+        this.rsi = rsi;
+    }
+
+    public double getMacdLine() {
+        return macdLine;
+    }
+
+    public void setMacdLine(double macdLine) {
+        this.macdLine = macdLine;
+    }
+
+    public double getUpperBollinger() {
+        return upperBollinger;
+    }
+
+    public void setUpperBollinger(double upperBollinger) {
+        this.upperBollinger = upperBollinger;
     }
 
     public LocalDateTime getSuggestionDate() {

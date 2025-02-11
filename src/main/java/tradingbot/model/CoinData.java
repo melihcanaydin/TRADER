@@ -2,17 +2,46 @@ package tradingbot.model;
 
 import java.util.Map;
 
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import tradingbot.util.JsonMapConverter;
+
+@Entity
+@Table(name = "coin_data")
 public class CoinData {
 
-    private final double price;
-    private final double[] fibonacciLevels;
-    private final double rsi;
-    private final double volume;
-    private final double previousVolume;
-    private final Map<Integer, Double> movingAverages;
-    private final Map<Integer, Double> previousMovingAverages;
+    @Id
+    private String coinName;
 
-    public CoinData(double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume, Map<Integer, Double> movingAverages, Map<Integer, Double> previousMovingAverages) {
+    private double price;
+    private double[] fibonacciLevels;
+    private double rsi;
+    private double volume;
+    private double previousVolume;
+
+    @Convert(converter = JsonMapConverter.class)
+    private Map<Integer, Double> movingAverages;
+
+    @Convert(converter = JsonMapConverter.class)
+    private Map<Integer, Double> previousMovingAverages;
+
+    private double macdLine;
+    private double signalLine;
+    private double upperBollinger;
+    private double lowerBollinger;
+    private double atr;
+    private double obv;
+
+    public CoinData() {}
+
+    public CoinData(String coinName, double price, double[] fibonacciLevels, double rsi,
+            double volume, double previousVolume, Map<Integer, Double> movingAverages,
+            Map<Integer, Double> previousMovingAverages, double macdLine, double signalLine,
+            double upperBollinger, double lowerBollinger, double atr, double obv) {
+        this.coinName = coinName;
         this.price = price;
         this.fibonacciLevels = fibonacciLevels;
         this.rsi = rsi;
@@ -20,6 +49,25 @@ public class CoinData {
         this.previousVolume = previousVolume;
         this.movingAverages = movingAverages;
         this.previousMovingAverages = previousMovingAverages;
+        this.macdLine = macdLine;
+        this.signalLine = signalLine;
+        this.upperBollinger = upperBollinger;
+        this.lowerBollinger = lowerBollinger;
+        this.atr = atr;
+        this.obv = obv;
+    }
+
+    public Double getMovingAverage(int period) {
+        return movingAverages != null ? movingAverages.getOrDefault(period, 0.0) : 0.0;
+    }
+
+    public Double getPreviousMovingAverage(int period) {
+        return previousMovingAverages != null ? previousMovingAverages.getOrDefault(period, 0.0)
+                : 0.0;
+    }
+
+    public String getCoinName() {
+        return coinName;
     }
 
     public double getPrice() {
@@ -42,23 +90,27 @@ public class CoinData {
         return previousVolume;
     }
 
-    public double getMovingAverage(int period) {
-        return movingAverages.getOrDefault(period, 0.0);
+    public double getMacdLine() {
+        return macdLine;
     }
 
-    public double getRsi() {
-        return rsi;
+    public double getSignalLine() {
+        return signalLine;
     }
 
-    public Map<Integer, Double> getMovingAverages() {
-        return movingAverages;
+    public double getUpperBollinger() {
+        return upperBollinger;
     }
 
-    public Map<Integer, Double> getPreviousMovingAverages() {
-        return previousMovingAverages;
+    public double getLowerBollinger() {
+        return lowerBollinger;
     }
 
-    public Double getPreviousMovingAverage(int period) {
-        return previousMovingAverages.getOrDefault(period, 0.0);
+    public double getAtr() {
+        return atr;
+    }
+
+    public double getObv() {
+        return obv;
     }
 }

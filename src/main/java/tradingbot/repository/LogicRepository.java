@@ -1,63 +1,55 @@
 package tradingbot.repository;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import tradingbot.model.Coin;
 import tradingbot.model.CoinData;
 import tradingbot.model.MarketData;
+import tradingbot.service.analysis.TechnicalAnalysisService;
 
 @Repository
 public class LogicRepository {
 
-    private final Map<Coin, CoinData> coinDataMap = new HashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(LogicRepository.class);
+
     private final MarketDataRepository marketDataRepository;
+    private final TechnicalAnalysisService analysisService;
 
-    public LogicRepository(MarketDataRepository marketDataRepository) {
+    private final Map<Coin, CoinData> coinDataMap = new HashMap<>();
+
+    public LogicRepository(MarketDataRepository marketDataRepository,
+            TechnicalAnalysisService analysisService) {
         this.marketDataRepository = marketDataRepository;
+        this.analysisService = analysisService;
     }
 
-    public void updateCoinData(Coin coin, double price, double[] fibonacciLevels, double rsi, double volume, double previousVolume, Map<Integer, Double> movingAverages, Map<Integer, Double> previousMovingAverages) {
-        CoinData coinData = new CoinData(price, fibonacciLevels, rsi, volume, previousVolume, movingAverages, previousMovingAverages);
+    public void analyzeMarketData(MarketData marketData) {
+        // List<MarketData> historicalData =
+        // marketDataRepository.findRecentData(marketData.getSymbol(), PageRequest.of(0, 30));
+
+        // if (historicalData.size() < 26) {
+        // log.warn("Not enough historical data for indicator calculations.");
+        // return;
+        // }
+
+        // double macd = analysisService.calculateMACD(historicalData);
+        // double signalLine = analysisService.calculateSignalLine(historicalData);
+        // double atr = analysisService.calculateATR(historicalData, 14);
+        // double obv = analysisService.calculateOBV(historicalData);
+        // double[] bb = analysisService.calculateBollingerBands(historicalData, 20);
+
+        // log.info("Computed MACD: {}, Signal Line: {}, ATR: {}, OBV: {}", macd, signalLine, atr,
+        // obv);
+        // log.info("Bollinger Bands - Upper: {}, Middle: {}, Lower: {}", bb[0], bb[1], bb[2]);
+    }
+
+    public void updateCoinData(Coin coin, CoinData coinData) {
         coinDataMap.put(coin, coinData);
-
-        MarketData marketData = new MarketData();
-        marketData.setSymbol(coin.toString());
-        marketData.setClosePrice(price);
-        marketData.setHighPrice(fibonacciLevels[0]);
-        marketData.setLowPrice(fibonacciLevels[fibonacciLevels.length - 1]);
-        marketData.setVolume(volume);
-        marketData.setMovingAverage5(movingAverages.getOrDefault(5, 0.0));
-        marketData.setMovingAverage8(movingAverages.getOrDefault(8, 0.0));
-        marketData.setMovingAverage21(movingAverages.getOrDefault(21, 0.0));
-        marketData.setRsi(rsi);
-        marketData.setCreatedAt(LocalDateTime.now());
-
-        marketDataRepository.save(marketData);
-    }
-
-    public CoinData getCoinData(Coin coin) {
-        return coinDataMap.get(coin);
-    }
-
-    public Map<Coin, CoinData> getAllCoinData() {
-        return new HashMap<>(coinDataMap);
-    }
-
-    public Map<Integer, Double> getMovingAverages(Coin coin, Iterable<Integer> periods) {
-        CoinData coinData = getCoinData(coin);
-
-        if (coinData == null) {
-            return new HashMap<>();
-        }
-
-        Map<Integer, Double> movingAverages = new HashMap<>();
-        for (int period : periods) {
-            movingAverages.put(period, coinData.getMovingAverage(period));
-        }
-        return movingAverages;
+        log.info("Updated CoinData for {}", coin);
     }
 }

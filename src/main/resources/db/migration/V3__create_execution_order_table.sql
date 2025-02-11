@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS execution_order (
+    id SERIAL PRIMARY KEY,
+    symbol VARCHAR(20) NOT NULL,
+    order_type VARCHAR(10) NOT NULL CHECK (order_type IN ('BUY', 'SELL')),
+    price DOUBLE PRECISION NOT NULL,
+    quantity DOUBLE PRECISION NOT NULL,
+    leverage INTEGER NOT NULL,
+    trailing_stop DOUBLE PRECISION,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

@@ -45,6 +45,42 @@ public class MarketData {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    // ✅ Add a default constructor for Hibernate
+    public MarketData() {}
+
+    public MarketData(String symbol, Long openTime, double open, double high, double low,
+            double close, double volume, Long closeTime) {
+        this.symbol = symbol;
+        this.createdAt = LocalDateTime.now();
+        this.interval = "N/A";
+
+        this.closePrice = close;
+        this.highPrice = high;
+        this.lowPrice = low;
+        this.volume = volume;
+
+        this.movingAverage5 = null;
+        this.movingAverage8 = null;
+        this.movingAverage21 = null;
+        this.rsi = 0;
+    }
+
+    public MarketData(String symbol, String interval, double closePrice, double highPrice,
+            double lowPrice, double volume, Double movingAverage5, Double movingAverage8,
+            Double movingAverage21, double rsi, LocalDateTime createdAt) {
+        this.symbol = symbol;
+        this.interval = interval;
+        this.closePrice = closePrice;
+        this.highPrice = highPrice;
+        this.lowPrice = lowPrice;
+        this.volume = volume;
+        this.movingAverage5 = movingAverage5;
+        this.movingAverage8 = movingAverage8;
+        this.movingAverage21 = movingAverage21;
+        this.rsi = rsi;
+        this.createdAt = createdAt;
+    }
+
     public Long getId() {
         return id;
     }
@@ -140,4 +176,6 @@ public class MarketData {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+
 }
