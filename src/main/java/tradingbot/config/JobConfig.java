@@ -22,7 +22,7 @@ public class JobConfig {
     @Bean
     public Trigger jobTrigger(JobDetail jobDetail) {
         return TriggerBuilder.newTrigger().forJob(jobDetail).withIdentity("priceCheckerTrigger")
-                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(60)
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInMinutes(120)
                         .repeatForever())
                 .build();
     }

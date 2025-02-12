@@ -7,18 +7,18 @@ import org.springframework.stereotype.Service;
 import tradingbot.model.MarketData;
 import tradingbot.service.analysis.MarketAnalysisHelper;
 import tradingbot.service.analysis.MarketIndicators;
-import tradingbot.service.rule.EntryRuleService;
-import tradingbot.service.rule.ExitRuleService;
+import tradingbot.service.rule.LongTermEntryRuleService;
+import tradingbot.service.rule.LongTermExitRuleService;
 
 @Service
 public class TradingStrategyService {
 
     private final MarketAnalysisHelper analysisHelper;
-    private final EntryRuleService entryRuleService;
-    private final ExitRuleService exitRuleService;
+    private final LongTermEntryRuleService entryRuleService;
+    private final LongTermExitRuleService exitRuleService;
 
     public TradingStrategyService(MarketAnalysisHelper analysisHelper,
-            EntryRuleService entryRuleService, ExitRuleService exitRuleService) {
+            LongTermEntryRuleService entryRuleService, LongTermExitRuleService exitRuleService) {
         this.analysisHelper = analysisHelper;
         this.entryRuleService = entryRuleService;
         this.exitRuleService = exitRuleService;

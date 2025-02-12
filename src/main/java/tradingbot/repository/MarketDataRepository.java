@@ -12,8 +12,9 @@ import tradingbot.model.MarketData;
 
 @Repository
 public interface MarketDataRepository extends JpaRepository<MarketData, Long> {
-    @Query("SELECT m FROM MarketData m WHERE m.symbol = :symbol ORDER BY m.createdAt DESC")
+
+    @Query("SELECT m FROM MarketData m WHERE m.symbol = :symbol ORDER BY m.closeTime DESC")
     List<MarketData> findRecentData(@Param("symbol") String symbol, Pageable pageable);
 
-    List<MarketData> findTop201BySymbolOrderByCreatedAtDesc(String symbol);
+    List<MarketData> findTop201BySymbolOrderByCloseTimeDesc(String symbol);
 }

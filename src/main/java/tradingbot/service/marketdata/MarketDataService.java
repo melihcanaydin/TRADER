@@ -66,10 +66,10 @@ public class MarketDataService {
                 .collect(Collectors.toList());
 
         List<MarketData> parsedMarketData = candlestickDtos.stream()
-                .map(dto -> new MarketData(coin.name(), dto.getOpenTime(),
-                        Double.parseDouble(dto.getOpen()), Double.parseDouble(dto.getHigh()),
-                        Double.parseDouble(dto.getLow()), Double.parseDouble(dto.getClose()),
-                        Double.parseDouble(dto.getVolume()), dto.getCloseTime()))
+                .map(dto -> new MarketData(coin.name(), "DAILY", // Example interval
+                        dto.getOpenTime(), dto.getCloseTime(), Double.parseDouble(dto.getOpen()),
+                        Double.parseDouble(dto.getHigh()), Double.parseDouble(dto.getLow()),
+                        Double.parseDouble(dto.getClose()), Double.parseDouble(dto.getVolume())))
                 .collect(Collectors.toList());
 
         // saveMarketData(parsedMarketData);

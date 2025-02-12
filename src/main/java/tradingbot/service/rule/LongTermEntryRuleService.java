@@ -8,13 +8,13 @@ import tradingbot.service.analysis.MarketIndicators;
 import tradingbot.service.notification.NotificationService;
 
 @Service
-public class EntryRuleService {
+public class LongTermEntryRuleService {
 
-        private static final Logger log = LoggerFactory.getLogger(EntryRuleService.class);
+        private static final Logger log = LoggerFactory.getLogger(LongTermEntryRuleService.class);
 
         private final NotificationService telegramService;
 
-        public EntryRuleService(NotificationService telegramService) {
+        public LongTermEntryRuleService(NotificationService telegramService) {
                 this.telegramService = telegramService;
         }
 

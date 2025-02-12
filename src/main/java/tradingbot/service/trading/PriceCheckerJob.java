@@ -14,9 +14,6 @@ import org.springframework.stereotype.Component;
 import tradingbot.model.Coin;
 import tradingbot.model.MarketData;
 import tradingbot.service.marketdata.MarketDataService;
-import tradingbot.service.notification.NotificationService;
-import tradingbot.service.strategy.TradingStrategyService;
-import tradingbot.service.strategy.TradingStrategyService.TradeDecision;
 
 @Component
 @DisallowConcurrentExecution
@@ -27,9 +24,7 @@ public class PriceCheckerJob implements Job {
     @Autowired
     private MarketDataService marketDataService;
     @Autowired
-    private TradingStrategyService tradingStrategy;
-    @Autowired
-    private NotificationService telegramService;
+    private TradingExecutorService tradingExecutor;
 
     public PriceCheckerJob() {}
 
@@ -41,67 +36,18 @@ public class PriceCheckerJob implements Job {
         }
 
         logger.info("✅ PriceCheckerJob executed at: {}", System.currentTimeMillis());
-        logger.info("Job key: {}", context.getJobDetail().getKey());
-        logger.info("Next fire time: {}", context.getTrigger().getNextFireTime());
 
-        processTradingLogic();
-    }
 
-    private void processTradingLogic() {
+        String strategyType = "long_term"; // Change to "mid_term" or "short_term" dynamically if
+                                           // needed.
+
         for (Coin coin : Coin.values()) {
             try {
                 List<MarketData> marketDataList = marketDataService.getMarketData(coin);
-                if (marketDataList == null || marketDataList.isEmpty()) {
-                    logger.warn("Skipping {} due to missing market data", coin.name());
-                    continue;
-                }
-
-                TradeDecision tradeDecision = tradingStrategy.evaluateTrade(marketDataList);
-                MarketData latestData = marketDataList.get(0);
-
-                if (tradeDecision.shouldEnterTrade) {
-                    handleBuySignal(latestData, tradeDecision);
-                }
-
-                if (tradeDecision.shouldExitTrade) {
-                    handleSellSignal(latestData, tradeDecision);
-                }
-
+                tradingExecutor.executeTradingCheck(coin, marketDataList, strategyType);
             } catch (Exception e) {
                 logger.error("❌ Error processing {}: {}", coin.name(), e.getMessage(), e);
             }
         }
-    }
-
-    private void handleBuySignal(MarketData latestData, TradeDecision tradeDecision) {
-        String buyMessage = String.format(
-                "<pre>\n" + "<b>🚀 BUY SIGNAL DETECTED! 🚀</b>\n" + "<b>🔹 Coin:</b> %s\n"
-                        + "<b>💰 Price:</b> <code>%.2f</code>\n"
-                        + "<b>📊 RSI (14):</b> <code>%.2f</code>\n"
-                        + "<b>📈 MACD Line:</b> <code>%.2f</code>\n"
-                        + "<b>🔼 Bollinger Upper:</b> <code>%.2f</code>\n"
-                        + "<b>📈 OBV:</b> <code>%.2f</code>\n" + "</pre>",
-                latestData.getSymbol(), latestData.getClosePrice(), tradeDecision.indicators.rsi,
-                tradeDecision.indicators.macdLine, tradeDecision.indicators.bollingerBands[0],
-                tradeDecision.indicators.obv);
-
-        logger.info(buyMessage);
-        telegramService.sendMessage(buyMessage);
-    }
-
-    private void handleSellSignal(MarketData latestData, TradeDecision tradeDecision) {
-        String sellMessage = String.format(
-                "<pre>\n" + "<b>⚠️ SELL SIGNAL DETECTED! ⚠️</b>\n" + "<b>🔹 Coin:</b> %s\n"
-                        + "<b>💰 Price:</b> <code>%.2f</code>\n"
-                        + "<b>📊 RSI (14):</b> <code>%.2f</code>\n"
-                        + "<b>📉 MACD Line:</b> <code>%.2f</code>\n"
-                        + "<b>🔽 Bollinger Lower:</b> <code>%.2f</code>\n"
-                        + "<b>📉 OBV:</b> <code>%.2f</code>\n" + "</pre>",
-                latestData.getSymbol(), latestData.getClosePrice(), tradeDecision.indicators.rsi,
-                tradeDecision.indicators.macdLine, tradeDecision.indicators.bollingerBands[2],
-                tradeDecision.indicators.obv);
-
-        logger.info(sellMessage);
-        telegramService.sendMessage(sellMessage);
     }
 }
